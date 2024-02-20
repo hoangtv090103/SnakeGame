@@ -43,6 +43,7 @@ public class GamePanel extends JPanel implements ActionListener {
     Timer timer;
     Random random;
 
+    JButton restartButton = new JButton("Restart");
 
     /**
      * Constructor
@@ -53,7 +54,6 @@ public class GamePanel extends JPanel implements ActionListener {
      * Start the game
      */
     GamePanel() {
-
         random = new Random();
         this.setPreferredSize(new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT));
         this.setBackground(Color.black);
@@ -61,7 +61,6 @@ public class GamePanel extends JPanel implements ActionListener {
         this.addKeyListener(new MyKeyAdapter());
         startGame();
     }
-
 
     /**
      * Start the game
@@ -102,9 +101,10 @@ public class GamePanel extends JPanel implements ActionListener {
     public void draw(Graphics g) {
         if (!running) {
             gameOver(g);
+            return;
         }
 
-        // Draw grid
+        // Draw the grid
         for (int i = 0; i < SCREEN_HEIGHT / UNIT_SIZE; i++) {
             g.drawLine(i * UNIT_SIZE, 0, i * UNIT_SIZE, SCREEN_HEIGHT);
             g.drawLine(0, i * UNIT_SIZE, SCREEN_WIDTH, i * UNIT_SIZE);
@@ -112,12 +112,13 @@ public class GamePanel extends JPanel implements ActionListener {
         g.setColor(Color.red);
         g.fillOval(appleX, appleY, UNIT_SIZE, UNIT_SIZE);
 
+        // Draw the snake
         for (int i = 0; i < bodyParts; i++) {
             if (i == 0) {
                 g.setColor(Color.green);
             } else {
                 g.setColor(new Color(45, 189, 0));
-                g.setColor(new Color(random.nextInt(255), random.nextInt(255), random.nextInt(255)));
+//                g.setColor(new Color(random.nextInt(255), random.nextInt(255), random.nextInt(255)));
             }
             g.fillRect(x[i], y[i], UNIT_SIZE, UNIT_SIZE);
         }
@@ -247,13 +248,31 @@ public class GamePanel extends JPanel implements ActionListener {
         FontMetrics metrics = getFontMetrics(g.getFont());
         g.drawString("Game Over", (SCREEN_WIDTH - metrics.stringWidth("Game Over")) / 2, SCREEN_HEIGHT / 2);
 
-        JButton restartButton = new JButton("Restart");
-        restartButton.setBounds(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 100, 50);
+        int buttonWidth = 100;
+        int buttonHeight = 50;
+
+        int x = (SCREEN_WIDTH - buttonWidth) / 2;
+        int y = (SCREEN_HEIGHT) / 2;
+
+        restartButton.setBounds(x, y, buttonWidth, buttonHeight);
         restartButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                startGame();
+                restartGame();
             }
         });
+        this.add(restartButton);
+    }
+
+    public void restartGame() {
+        if (timer != null) {
+            timer.stop();
+        }
+        applesEaten = 0;
+        bodyParts = 6;
+        running = true;
+        this.repaint();
+        this.remove(restartButton);
+        startGame();
     }
 
     /**
